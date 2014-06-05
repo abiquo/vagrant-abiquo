@@ -1,0 +1,22 @@
+Vagrant.require_plugin('vagrant-abiquo')
+
+Vagrant.configure('2') do |config|
+  config.vm.provider :abiquo do |provider, override|
+    override.vm.box = 'abiquo'
+    override.vm.box_url = "https://github.com/danfaizer/vagrant-abiquo/raw/master/box/abiquo.box"
+    provider.api_user = ENV['ABIQUO_API_USER']
+    provider.api_password = ENV['ABIQUO_API_PASSWORD']
+    provider.api_uri = 'https://preproduction.bcn.abiquo.com/api'
+  end
+
+  config.vm.provision :shell, :path => 'scripts/provision.sh'
+
+  config.vm.define :virtualmachine do |virtualmachine|
+    virtualmachine.vm.provider :abiquo do |provider|
+      provider.datacenter = 'DC1'
+      provider.virtualdatacenter = 'vdc1'
+      provider.virtualappliance = 'vapp1'
+      provider.template = 'Core'
+    end
+  end
+end
