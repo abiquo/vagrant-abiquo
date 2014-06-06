@@ -2,12 +2,6 @@ module VagrantPlugins
   module Abiquo
     module Helpers
       class Result
-        def find_vdc_id(vdcs, vdc_name)
-          vdcs.each do |vdc|
-            raise vdc.name
-          end
-        end
-
         def initialize(body)
           @result = body
         end

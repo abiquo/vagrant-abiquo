@@ -51,23 +51,38 @@ module VagrantPlugins
             })
         end
 
-        def get_request(resource, params={})
+        # TO-DO
+        # Crear metodos de FIND_VDC / FIND_VAPP / FIND_VM y eliminarlos de create y provider
+        #
+        def http_request(resource, method, headers={}, data={})
           begin
-            req = RestClient::Resource.new( @config.abiquo_api_uri+resource, :user => @config.abiquo_api_user, :password => @config.abiquo_api_password, :timeout => @timeout, :open_timeout => @otimeout )
-            if params.nil? then
-              res = req.get
-            else
-              res = req.get(params)
+            req = RestClient::Resource.new( resource, :user => @config.abiquo_api_user, :password => @config.abiquo_api_password, :timeout => @timeout, :open_timeout => @otimeout )
+            case method
+              when "GET"
+                if headers.nil? then
+                  res = req.get
+                else
+                  res = req.get(headers)
+                end
+              when "POST"
+                if headers.nil? then
+                  res = req.post
+                else
+                  res = req.post(data,headers)
+                end
             end
           rescue => e
             raise(Errors::RestClientError, {
-              :path => @config.abiquo_api_uri+resource,
-              :params => params,
+              :path => resource,
+              :headers => headers,
+              :data => data,
               :response => e.to_s
             })
           end
-          if res.code == 201 or res.code == 200 then
-            return res.body
+          if res.code == 202 or 
+             res.code == 201 or 
+             res.code == 200 then
+               return res.body
           end
         end
 

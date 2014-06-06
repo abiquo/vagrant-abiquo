@@ -7,6 +7,7 @@ module VagrantPlugins
       attr_accessor :virtualdatacenter
       attr_accessor :virtualappliance
       attr_accessor :label
+      attr_accessor :exposed_nic
       attr_accessor :template
       attr_accessor :setup
 

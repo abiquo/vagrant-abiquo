@@ -7,23 +7,44 @@ module VagrantPlugins
       # This class method caches status for all droplets within
       # the Digital Ocean account. A specific droplet's status
       # may be refreshed by passing :refresh => true as an option.
+      def self.virtualmachine(machine)
+        @client = Helpers::ApiClient.new(machine)
+        if !@virtualmachines
+          vms_accept = {:accept => "application/vnd.abiquo.virtualmachines+json" }
+          @virtualmachines = JSON.parse(@client.http_request(machine.provider_config.abiquo_api_uri+"/cloud/virtualmachines?limit=0","GET", vms_accept))
+        end
+
+        @virtualmachines['collection'].each do |vm|
+          
+          puts "VM id --> "+machine.id if not machine.id.nil?
+          puts "Lista de VMs -->"+vm['id'].to_s
+          if vm['id'].to_s == machine.id
+            virtualmachine ||= {'status' => 'active'}
+            @found = true
+          end
+        end
+        if not @found
+          virtualmachine ||= {'status' => 'not_created'}
+        end
+      end
+
       def self.droplet(machine, opts = {})
         client = Helpers::ApiClient.new(machine)
 
         # load status of droplets if it has not been done before
         if !@droplets
-#          result = client.get_request('/droplets')
-#          @droplets = result['droplets']
+          result = client.request('/droplets')
+          @droplets = result['droplets']
         end
 
         if opts[:refresh] && machine.id
           # refresh the droplet status for the given machine
           @droplets.delete_if { |d| d['id'].to_s == machine.id }
-          result = client.get_request("/droplets/#{machine.id}")
+          result = client.request("/droplets/#{machine.id}")
           @droplets << droplet = result['droplet']
         else
           # lookup droplet status for the given machine
-#          droplet = @droplets.find { |d| d['id'].to_s == machine.id }
+          droplet = @droplets.find { |d| d['id'].to_s == machine.id }
         end
 
         # if lookup by id failed, check for a droplet with a matching name
@@ -31,8 +52,8 @@ module VagrantPlugins
         # TODO allow the user to configure this behavior
         if !droplet
           name = machine.config.vm.hostname || machine.name
-#          droplet = @droplets.find { |d| d['name'] == name.to_s }
-#          machine.id = droplet['id'].to_s if droplet
+          droplet = @droplets.find { |d| d['name'] == name.to_s }
+          machine.id = droplet['id'].to_s if droplet
         end
 
         droplet ||= {'status' => 'not_created'}
@@ -91,7 +112,7 @@ module VagrantPlugins
       # The state must be an instance of {MachineState}. Please read the
       # documentation of that class for more information.
       def state
-        state = Provider.droplet(@machine)['status'].to_sym
+        state = Provider.virtualmachine(@machine)['status'].to_sym
         long = short = state.to_s
         Vagrant::MachineState.new(state, short, long)
       end

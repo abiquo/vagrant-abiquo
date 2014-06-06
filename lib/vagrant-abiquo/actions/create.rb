@@ -16,40 +16,75 @@ module VagrantPlugins
 
         def call(env)
           # Find for selected virtual datacenter
-          virtualdatacenters = @client.get_request("/cloud/virtualdatacenters?limit=0")
+          vdcs_accept = {:accept => "application/vnd.abiquo.virtualdatacenters+json" }
+          virtualdatacenters = @client.http_request(@machine.provider_config.abiquo_api_uri+"/cloud/virtualdatacenters?limit=0","GET", vdcs_accept)
           virtualdatacenter_id = @client.find_id("VirtualDatacener",virtualdatacenters, @machine.provider_config.virtualdatacenter)
           # Find for selected virtual appliance
-          virtualappliances = @client.get_request("/cloud/virtualdatacenters/#{virtualdatacenter_id}/virtualappliances?limit=0")
+          vapps_accept = {:accept => "application/vnd.abiquo.virtualappliances+json" }
+          virtualappliances = @client.http_request(@machine.provider_config.abiquo_api_uri+"/cloud/virtualdatacenters/#{virtualdatacenter_id}/virtualappliances?limit=0","GET",vapps_accept)
           virtualappliance_id = @client.find_id("VirtualAppliance",virtualappliances, @machine.provider_config.virtualappliance)
           # Find for selected vm template
-          templates = @client.get_request("/cloud/virtualdatacenters/#{virtualdatacenter_id}/action/templates?limit=0")
+          templates_accept = {:accept => "application/vnd.abiquo.virtualmachinetemplates+json"}
+          templates = @client.http_request(@machine.provider_config.abiquo_api_uri+"/cloud/virtualdatacenters/#{virtualdatacenter_id}/action/templates?limit=0","GET",templates_accept)
           template_href = @client.find_template("Template",templates, @machine.provider_config.template)
 
           # If everything is OK we can proceed to create the VM
-          @links = { :title => @machine.provider_config.template,  :rel => "virtualmachinetemplate", :type => "application/vnd.abiquo.virtualmachinetemplate+json", :href => template_href}
-          @vm_definition = {:label => @machine.provider_config.label, :vdrpEnabled => true, :links => @links}
+          # VM Template link
+          link = {}
+          link['title'] = @machine.provider_config.template
+          link['rel'] = "virtualmachinetemplate"
+          link['type'] = "application/vnd.abiquo.virtualmachinetemplate+json"
+          link['href'] = template_href
 
+          # VM entity
+          vm_definition = {}
+          vm_definition['label'] = @machine.provider_config.label
+          vm_definition['vdrpEnabled'] = true
+	  vm_definition['links'] = Array.new
+	  vm_definition['links'][0] = link
 
-#         CONTINUE FROM HERE
-# bundle exec vagrant up --provider=abiquo 
-#          vm = @client.post_request("/cloud/virtualdatacenters/#{virtualdatacenter_id}/virtualappliances/#{virtualappliance_id}/virtualmachine",@vm_definition)
+          # POST Headers
+          vm_post_headers = { :content_type => "application/vnd.abiquo.virtualmachine+json", :accept => "application/vnd.abiquo.virtualmachine+json" }
 
-          # wait for get_request to complete
+          # Creating VM in Abiquo
           env[:ui].info I18n.t('vagrant_abiquo.info.creating') 
-          @client.wait_for_event(env, result['vm']['event_id'])
+          @vm = JSON.parse(@client.http_request(@machine.provider_config.abiquo_api_uri+"/cloud/virtualdatacenters/#{virtualdatacenter_id}/virtualappliances/#{virtualappliance_id}/virtualmachines","POST",vm_post_headers,vm_definition.to_json))
 
-          # assign the machine id for reference in other commands
-          @machine.id = result['vm']['id'].to_s
+          # Deploying VM
+          env[:ui].info I18n.t('vagrant_abiquo.info.deploying')
+          @vm['links'].each do |link|
+            if link['rel'].eql? "deploy"
+              @task = JSON.parse(@client.http_request(link['href'],"POST",:accept => link['type']))
+	    end	
+          end
 
-          # refresh vm state with provider and output ip address
-          vm = Provider.vm(@machine, :refresh => true)
-          env[:ui].info I18n.t('vagrant_abiquo.info.vm_ip', {
-            :ip => vm['ip_address']
-          })
-
+          # Check when deploy finishes. This may take a while
           retryable(:tries => 120, :sleep => 10) do
-            next if env[:interrupted]
-            raise 'not ready' if !@machine.communicate.ready?
+            # TO-DO: Add content-type headers to GET request
+            @task_state = JSON.parse(@client.http_request(@task['links'][0]['href'],"GET"))
+            raise 'DeployInProgress' if @task_state['state'] == 'STARTED'
+          end
+
+          if @task_state['state'] == 'FINISHED_SUCCESSFULLY'
+            # Deploy successfully completed
+            env[:ui].info I18n.t('vagrant_abiquo.info.deploycompleted')
+            @vm['links'].each do |link|
+              if link['rel'].eql? "edit"
+                @vm = JSON.parse(@client.http_request(link['href'],"GET"))
+              end
+            end
+            @vm['links'].each do |link|
+              if link['rel'].eql? @machine.provider_config.exposed_nic
+                # Refresh vm state with provider and output ip address
+                virtualmachine = Provider.virtualmachine(@machine)
+                env[:ui].info I18n.t('vagrant_abiquo.info.vm_ip', {:ip => link['title']})
+                # Assign the machine id for reference in other commands
+                @machine.id = @vm['id'].to_s
+              end
+            end            
+          else
+            # Deploy failed
+            env[:ui].info I18n.t('vagrant_abiquo.info.deployfailed')
           end
 
           @app.call(env)

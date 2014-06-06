@@ -14,6 +14,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     provider.virtualdatacenter = 'testVDC'
     provider.virtualappliance = 'testing'
     provider.label = 'MyVagrantVM'
+    # Nic which is exposed for SSH access
+    provider.exposed_nic = 'nic0'
     provider.template = 'CoreVMDK'
   end
 end

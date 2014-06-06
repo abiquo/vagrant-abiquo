@@ -5,9 +5,12 @@ en:
       not_created: "VM has not been created"
       already_active: "VM is already active"
       already_off: "VM is already off"
-      creating: "Creating a new VM..."
-      VM_ip: "Assigned IP address: %{ip}"
-      VM_private_ip: "Private IP address: %{ip}"
+      creating: "Creating VM..."
+      deploying: "Deploying VM..."
+      deploycompleted: "VM deploy completed successfully"
+      deployfailed: "VM deploy failed. Look to Abiquo events."
+      vm_ip: "Assigned IP address: %{ip}"
+      vm_private_ip: "Private IP address: %{ip}"
       destroying: "Destroying the VM..."
       powering_off: "Powering off the VM..."
       powering_on: "Powering on the VM..."
@@ -37,7 +40,8 @@ en:
         API at:
 
         Path: %{path}
-        URI Params: %{params}
+        Headers: %{headers}
+        Data: %{data}
 
         The response status from the API was:
 
@@ -52,7 +56,8 @@ en:
       restclient_error: |-
         There was an issue with the request made to Abiquo API at:
         Path: %{path}
-        URI Params: %{params}
+        Headers: %{headers}
+        Data: %{data}
 
         The response status from the API was:
         Response: %{response}
