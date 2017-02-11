@@ -5,7 +5,7 @@ namespace :gem do
 end
 
 task :test do
-  result = sh 'bash test/test.sh'
+  result = sh 'bash -ex test/test.sh'
 
   if result
     puts 'Success!'

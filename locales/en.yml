@@ -1,34 +1,39 @@
 en:
   vagrant_abiquo:
     info:
-      off: "VM is off"
-      not_created: "VM has not been created"
-      already_active: "VM is already active"
-      already_off: "VM is already off"
-      creating: "Creating VM..."
-      deploying: "Deploying VM..."
-      deploycompleted: "VM deploy completed successfully"
-      deployfailed: "VM deploy failed. Look to Abiquo events."
-      vm_ip: "Assigned IP address: %{ip}"
-      vm_private_ip: "Private IP address: %{ip}"
-      destroying: "Destroying the VM..."
-      powering_off: "Powering off the VM..."
-      powering_on: "Powering on the VM..."
-      rebuilding: "Rebuilding the VM..."
-      reloading: "Rebooting the VM..."
-      creating_user: "Creating user account: %{user}..."
-      modifying_sudo: "Modifying sudoers file to remove tty requirement..."
-      using_key: "Using existing SSH key: %{name}"
-      creating_key: "Creating new SSH key: %{name}..."
-      trying_rsync_install: "Rsync not found, attempting to install with yum..."
-      rsyncing: "Rsyncing folder: %{hostpath} => %{guestpath}..."
-      rsync_missing: "The rsync executable was not found in the current path."
+      off: VM is off
+      not_created: VM has not been created
+      already_active: VM is already active
+      already_off: VM is already off
+      create: Creating VM...
+      deploy: Deploying VM...
+      deploycompleted: VM deploy completed successfully
+      deployfailed: VM deploy failed. Look to Abiquo events.
+      vm_ip: Virtual machine IP is %{ip}
+      vm_private_ip: Private IP address %{ip}
+      destroying: Destroying VM '%{vm}'...
+      deleted: VM '%{vm}' has been deleted.
+      deleted_vapp: vApp '%{vapp}' has been deleted since it was empty.
+      powering_off: Powering off the VM...
+      powering_on: Powering on the VM...
+      rebuilding: Rebuilding the VM...
+      reloading: Rebooting the VM...
+      creating_user: Creating user account %{user}...
+      modifying_sudo: Modifying sudoers file to remove tty requirement...
+      using_key: Using existing SSH key %{name}
+      creating_key: Creating new SSH key %{name}...
+      trying_rsync_install: Rsync not found, attempting to install with yum...
+      rsyncing: Rsyncing folder %{hostpath} => %{guestpath}...
+      rsync_missing: The rsync executable was not found in the current path.
     config:
-      client_id: "Client ID is required"
-      api_key: "API key is required"
-      private_key: "SSH private key path is required"
-      public_key: "SSH public key not found: %{key}"
+      client_id: Client ID is required
+      api_key: API key is required"
+      private_key: SSH private key path is required
+      public_key: SSH public key not found %{key}
     errors:
+      vdc_not_found: Virtual datacenter '%{vdc}' not found
+      template_not_found: Template %{template} not found in VDC '%{vdc}'
+      poweroff: Error powering off VM %{vm}. Current state is %{state}
       public_key: |-
         There was an issue reading the public key at:
 

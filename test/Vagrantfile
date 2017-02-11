@@ -1,22 +1,25 @@
-Vagrant.require_plugin('vagrant-abiquo')
-
 Vagrant.configure('2') do |config|
+  config.ssh.username = 'root'
+  config.ssh.password = 'Temporal1!'
+
+  config.vm.synced_folder ".", "/vagrant",type: "rsync"
   config.vm.provider :abiquo do |provider, override|
     override.vm.box = 'abiquo'
-    override.vm.box_url = "https://github.com/danfaizer/vagrant-abiquo/raw/master/box/abiquo.box"
-    provider.api_user = ENV['ABIQUO_API_USER']
-    provider.api_password = ENV['ABIQUO_API_PASSWORD']
-    provider.api_uri = 'https://preproduction.bcn.abiquo.com/api'
+    override.vm.box_url = "https://github.com/abiquo/vagrant-abiquo/raw/master/box/abiquo.box"
+    provider.abiquo_connection_data = {
+      abiquo_api_url: ENV['ABQ_URL'],
+      abiquo_username: ENV['ABQ_USER'],
+      abiquo_password: ENV['ABQ_PASS']
+    }
   end
 
   config.vm.provision :shell, :path => 'scripts/provision.sh'
 
   config.vm.define :virtualmachine do |virtualmachine|
     virtualmachine.vm.provider :abiquo do |provider|
-      provider.datacenter = 'DC1'
-      provider.virtualdatacenter = 'vdc1'
-      provider.virtualappliance = 'vapp1'
-      provider.template = 'Core'
+      provider.virtualdatacenter = ENV['ABQ_VDC']
+      provider.virtualappliance = ENV['ABQ_VAPP'] || 'testing'
+      provider.template = ENV['ABQ_TEMPLATE'] || 'Core'
     end
   end
 end

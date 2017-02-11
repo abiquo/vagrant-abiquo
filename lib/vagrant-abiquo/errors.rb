@@ -5,16 +5,24 @@ module VagrantPlugins
         error_namespace("vagrant_abiquo.errors")
       end
 
+      class VDCNotFound < AbiquoError
+        error_key(:vdc_not_found)
+      end
+
+      class TemplateNotFound < AbiquoError
+        error_key(:template_not_found)
+      end
+
+      class PowerOffError < AbiquoError
+        error_key(:poweroff_error)
+      end
+
       class APIStatusError < AbiquoError
         error_key(:api_status)
       end
 
       class APIFindError < AbiquoError
         error_key(:apifind_error)
-      end
-      
-      class RestClientError < AbiquoError
-        error_key(:restclient_error)
       end
 
       class JSONError < AbiquoError

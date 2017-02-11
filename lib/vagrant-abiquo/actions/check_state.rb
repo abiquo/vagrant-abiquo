@@ -1,7 +1,11 @@
+require 'vagrant-abiquo/helpers/client'
+
 module VagrantPlugins
   module Abiquo
     module Actions
       class CheckState
+        include Helpers::Client
+        
         def initialize(app, env)
           @app = app
           @machine = env[:machine]

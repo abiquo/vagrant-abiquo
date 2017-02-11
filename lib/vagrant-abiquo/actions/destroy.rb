@@ -5,6 +5,7 @@ module VagrantPlugins
     module Actions
       class Destroy
         include Helpers::Client
+        include Vagrant::Util::Retryable
 
         def initialize(app, env)
           @app = app
@@ -14,19 +15,30 @@ module VagrantPlugins
         end
 
         def call(env)
-          # submit destroy droplet request
-#          result = @client.request("/droplets/#{@machine.id}/destroy")
+          env[:ui].info I18n.t('vagrant_abiquo.info.destroying', vm: @machine.name)
+          vm_lnk = AbiquoAPI::Link.new :href => @machine.id,
+                                       :type => 'application/vnd.abiquo.virtualmachine+json',
+                                       :client => @client
+          vm = vm_lnk.get
+          vm.delete
 
-          env[:ui].info I18n.t('vagrant_abiquo.info.destroying')
+          # Check when task finishes. This may take a while
+          retryable(:tries => 120, :sleep => 5) do
+            begin
+              raise Exception if vm.refresh
+            rescue AbiquoAPIClient::NotFound
+              env[:ui].info I18n.t('vagrant_abiquo.info.deleted', vm: @machine.name)
+            end
+          end
 
-          # wait for the destroy progress to start
-#          @client.wait_for_event(env, result['event_id']) do |response|
-#            break if response['event']['percentage'] != nil
-#          end
+          vapp = vm.link(:virtualappliance).get
+          vms = vapp.link(:virtualmachines).get.count
+          if vms == 0
+            vapp.delete
+            env[:ui].info I18n.t('vagrant_abiquo.info.deleted_vapp', vapp: vapp.name)
+          end
 
-          # set the machine id to nil to cleanup local vagrant state
           @machine.id = nil
-
           @app.call(env)
         end
       end

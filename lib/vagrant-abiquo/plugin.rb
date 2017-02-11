@@ -12,11 +12,10 @@ module VagrantPlugins
         Config
       end
 
-      provider(:abiquo) do
+      provider(:abiquo, parallel: true) do
         require_relative 'provider'
         Provider
       end
-
     end
   end
 end
