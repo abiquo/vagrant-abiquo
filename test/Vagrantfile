@@ -19,7 +19,7 @@ Vagrant.configure('2') do |config|
     virtualmachine.vm.provider :abiquo do |provider|
       provider.virtualdatacenter = ENV['ABQ_VDC']
       provider.virtualappliance = ENV['ABQ_VAPP'] || 'testing'
-      provider.template = ENV['ABQ_TEMPLATE'] || 'Core'
+      provider.template = ENV['ABQ_TMPL'] || 'Core'
     end
   end
 end
