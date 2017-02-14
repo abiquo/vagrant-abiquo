@@ -25,13 +25,13 @@ PATH
   remote: .
   specs:
     vagrant-abiquo (0.0.1)
-      abiquo-api (~> 0.1.0)
+      abiquo-api (~> 0.1.1)
       log4r
 
 GEM
   remote: https://rubygems.org/
   specs:
-    abiquo-api (0.1.0)
+    abiquo-api (0.1.1)
       addressable (~> 2.4.0, >= 2.4.0)
       excon (~> 0.43, >= 0.43.0)
       faraday (~> 0.9.2, >= 0.9.2)
@@ -138,7 +138,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  abiquo-api (~> 0.1.0)
+  abiquo-api (~> 0.1.1)
   pry
   pry-byebug
   rake

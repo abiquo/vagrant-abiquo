@@ -19,6 +19,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     }
     provider.virtualdatacenter = 'Support Lab - Marc'
     provider.virtualappliance = 'Tests'
-    provider.template = 'Alpinev2'
+    provider.template = 'Alpine Linux'
   end
 end
