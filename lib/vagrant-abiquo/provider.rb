@@ -1,6 +1,6 @@
 require 'vagrant-abiquo/helpers/client'
 require 'abiquo-api'
-require 'pry'
+
 module VagrantPlugins
   module Abiquo
     class Provider < Vagrant.plugin('2', :provider)

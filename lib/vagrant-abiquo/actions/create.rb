@@ -1,5 +1,5 @@
 require 'vagrant-abiquo/helpers/client'
-require 'pry'
+
 module VagrantPlugins
   module Abiquo
     module Actions
@@ -46,7 +46,6 @@ module VagrantPlugins
           ram_mb = @machine.provider_config.ram_mb
 
           # VM entity
-          binding.pry
           vm_definition = {}
           vm_definition['cpu'] = cpu_cores || template.cpuRequired
           vm_definition['ram'] = ram_mb || template.ramRequired
