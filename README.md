@@ -62,6 +62,10 @@ The following attributes are available to further configure the provider:
 - `provider.template` - A string representing the name of an availabe virtual
    machine template in the VDC. The available templates can be check in the 
    `Apps Library` section.
+- `provider.cpu_cores` - The number of CPU cores to assign to the virtual machine. If
+   missing, the required CPU from the template will be used.
+- `provider.ram_mb` - The amount of RAM in MB that will be assigned to the VM. If
+   missing, the required RAM from the template will be used.
 
 Run
 ---

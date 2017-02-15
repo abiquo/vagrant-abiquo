@@ -17,6 +17,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       abiquo_username: 'mcirauqui',
       abiquo_password: 'xxxx'
     }
+    provider.cpu_cores = 2
+    provider.ram_mb = 2048
     provider.virtualdatacenter = 'Support Lab - Marc'
     provider.virtualappliance = 'Tests'
     provider.template = 'Alpine Linux'

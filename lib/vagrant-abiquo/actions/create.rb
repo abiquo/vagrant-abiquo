@@ -1,5 +1,5 @@
 require 'vagrant-abiquo/helpers/client'
-
+require 'pry'
 module VagrantPlugins
   module Abiquo
     module Actions
@@ -41,8 +41,15 @@ module VagrantPlugins
           tmpl_link = template.link(:edit).clone.to_hash
           tmpl_link['rel'] = "virtualmachinetemplate"
           
+          # Configured CPU and RAM
+          cpu_cores = @machine.provider_config.cpu_cores
+          ram_mb = @machine.provider_config.ram_mb
+
           # VM entity
+          binding.pry
           vm_definition = {}
+          vm_definition['cpu'] = cpu_cores || template.cpuRequired
+          vm_definition['ram'] = ram_mb || template.ramRequired
           vm_definition['label'] = @machine.name
           vm_definition['vdrpEnabled'] = true
           vm_definition['links'] = [ tmpl_link ]
