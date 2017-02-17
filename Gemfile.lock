@@ -24,7 +24,7 @@ GIT
 PATH
   remote: .
   specs:
-    vagrant-abiquo (0.0.1)
+    vagrant-abiquo (0.0.2)
       abiquo-api (~> 0.1.1)
       log4r
 
