@@ -66,6 +66,9 @@ The following attributes are available to further configure the provider:
    missing, the required CPU from the template will be used.
 - `provider.ram_mb` - The amount of RAM in MB that will be assigned to the VM. If
    missing, the required RAM from the template will be used.
+- `provider.network` - A hash of network and IP pairs. Each key will be a network
+   name in Abiquo, and the value can be a specific IP to attach, or `nil` to
+   autoselect an IP from the network. 
 
 Run
 ---

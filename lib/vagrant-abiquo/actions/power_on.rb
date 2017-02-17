@@ -1,10 +1,12 @@
 require 'vagrant-abiquo/helpers/client'
+require 'vagrant-abiquo/helpers/abiquo'
 
 module VagrantPlugins
   module Abiquo
     module Actions
       class PowerOn
         include Helpers::Client
+        include Helpers::Abiquo
         include Vagrant::Util::Retryable
         
         def initialize(app, env)
@@ -15,24 +17,9 @@ module VagrantPlugins
         end
 
         def call(env)
-          vm_lnk = AbiquoAPI::Link.new :href => @machine.id,
-                                       :type => 'application/vnd.abiquo.virtualmachine+json',
-                                       :client => @client
-          vm = vm_lnk.get
-          task_lnk = @client.put(vm.link(:state), {"state" => "ON"}.to_json,
-                        :accept => 'application/vnd.abiquo.acceptedrequest+json',
-                        :content => 'application/vnd.abiquo.virtualmachinestate+json').link(:status)
-          @task = task_lnk.get
-
-          # Check when task finishes. This may take a while
-          retryable(:tries => 120, :sleep => 5) do
-            @task = @task.link(:self).get
-            raise Exception if @task.state == 'STARTED'
-          end
-
-          # Check the VM is off
-          vm = vm.link(:edit).get
-          raise PowerOffError, vm: vm.label, state: vm.state if vm.state != 'ON'
+          vm = get_vm(@machine.id)
+          vm = poweron(vm)
+          raise PowerOnError, vm: vm.label, state: vm.state if vm.state != 'ON'
 
           @app.call(env)
         end

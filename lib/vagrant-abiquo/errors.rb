@@ -17,6 +17,10 @@ module VagrantPlugins
         error_key(:poweroff_error)
       end
 
+      class NetworkError < AbiquoError
+        error_key(:network_error)
+      end
+
       class APIStatusError < AbiquoError
         error_key(:api_status)
       end

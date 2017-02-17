@@ -1,10 +1,12 @@
 require 'vagrant-abiquo/helpers/client'
+require 'vagrant-abiquo/helpers/abiquo'
 
 module VagrantPlugins
   module Abiquo
     module Actions
       class Destroy
         include Helpers::Client
+        include Helpers::Abiquo
         include Vagrant::Util::Retryable
 
         def initialize(app, env)
@@ -16,10 +18,7 @@ module VagrantPlugins
 
         def call(env)
           env[:ui].info I18n.t('vagrant_abiquo.info.destroying', vm: @machine.name)
-          vm_lnk = AbiquoAPI::Link.new :href => @machine.id,
-                                       :type => 'application/vnd.abiquo.virtualmachine+json',
-                                       :client => @client
-          vm = vm_lnk.get
+          vm = get_vm(@machine.id)
           vm.delete
 
           # Check when task finishes. This may take a while

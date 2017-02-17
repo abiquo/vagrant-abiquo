@@ -22,5 +22,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     provider.virtualdatacenter = 'Support Lab - Marc'
     provider.virtualappliance = 'Tests'
     provider.template = 'Alpine Linux'
+
+    provider.network = {
+      'private_dnsmasq' => nil
+    }
   end
 end

@@ -4,19 +4,19 @@ module VagrantPlugins
       attr_accessor :abiquo_connection_data
       attr_accessor :virtualdatacenter
       attr_accessor :virtualappliance
-      attr_accessor :ssh_private_ips
       attr_accessor :cpu_cores
       attr_accessor :ram_mb
       attr_accessor :template
+      attr_accessor :network
 
       def initialize
         @abiquo_connection_data = UNSET_VALUE
         @virtualdatacenter      = UNSET_VALUE
         @virtualappliance       = UNSET_VALUE
         @template               = UNSET_VALUE
-        @ssh_private_ips        = false
         @cpu_cores              = 0
         @ram_mb                 = 0
+        @network                = UNSET_VALUE
       end
 
       def finalize!
@@ -28,12 +28,13 @@ module VagrantPlugins
         @virtualappliance = ENV['ABQ_VAPP'] if ENV['ABQ_VAPP']
         @template = ENV['ABQ_TMPL'] if ENV['ABQ_TMPL']
 
-        @ssh_private_ips = ENV['ABQ_SSHPRIV'] if ENV['ABQ_SSHPRIV']
-
         @cpu_cores = ENV['ABQ_CPU'] if ENV['ABQ_CPU']
         @cpu_cores = nil if @cpu_cores == 0
         @ram_mb = ENV['ABQ_RAM'] if ENV['ABQ_RAM']
         @ram_mb = nil if @ram_mb == 0
+
+        @network = { ENV['ABQ_NET'] => ENV['ABQ_IP'] } if ENV['ABQ_NET'] && ENV['ABQ_IP']
+        @network = nil if @network == UNSET_VALUE
       end
 
       def validate(machine)

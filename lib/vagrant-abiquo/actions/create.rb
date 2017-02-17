@@ -1,10 +1,12 @@
 require 'vagrant-abiquo/helpers/client'
+require 'vagrant-abiquo/helpers/abiquo'
 
 module VagrantPlugins
   module Abiquo
     module Actions
       class Create
         include Helpers::Client
+        include Helpers::Abiquo
         include Vagrant::Util::Retryable
 
         def initialize(app, env)
@@ -16,24 +18,18 @@ module VagrantPlugins
 
         def call(env)
           # Find for selected virtual datacenter
-          vdcs_lnk = AbiquoAPI::Link.new :href => 'cloud/virtualdatacenters', 
-                                         :type => "application/vnd.abiquo.virtualdatacenters+json",
-                                         :client => @client
-          vdc = vdcs_lnk.get.select {|vd| vd.name == @machine.provider_config.virtualdatacenter }.first
+          vdc = get_vdc(@machine.provider_config.virtualdatacenter)
           raise Abiquo::Errors::VDCNotFound, vdc: @machine.provider_config.virtualdatacenter if vdc.nil?
           
           # Find for selected virtual appliance
-          vapp = vdc.link(:virtualappliances).get.select {|va| va.name == @machine.provider_config.virtualappliance }.first
+          vapp = get_vapp(vdc, @machine.provider_config.virtualappliance)
           if vapp.nil?
             # Then, just create the vApp
-            vapp_hash = { 'name' => @machine.provider_config.virtualappliance }
-            vapp = @client.post(vdc.link(:virtualappliances), vapp_hash.to_json,
-                      accept: 'application/vnd.abiquo.virtualappliance+json',
-                      content: 'application/vnd.abiquo.virtualappliance+json')
+            vapp = create_vapp(vdc, @machine.provider_config.virtualappliance)
           end
 
           # Find for selected vm template
-          template = vdc.link(:templates).get.select {|tmpl| tmpl.name == @machine.provider_config.template }.first
+          template = get_template(vdc, @machine.provider_config.template)
           raise Abiquo::Errors::TemplateNotFound, template: @machine.provider_config.template, vdc: vdc.name if template.nil?
           
           # If everything is OK we can proceed to create the VM
@@ -55,30 +51,30 @@ module VagrantPlugins
 
           # Create VM
           env[:ui].info I18n.t('vagrant_abiquo.info.create')
-          @vm = @client.post(vapp.link(:virtualmachines), vm_definition.to_json, :content => "application/vnd.abiquo.virtualmachine+json", 
-                                                                           :accept => "application/vnd.abiquo.virtualmachine+json" )
+          vm = create_vm(vm_definition, vapp)
+
+          # Check network
+          unless @machine.provider_config.network.nil?
+            # Network config is not nil, so we have
+            # to attach a specific net.
+            attach_net(vm, @machine.provider_config.network)
+            raise Abiquo::Errors::NetworkError if vm.nil?
+          end
+          vm = vm.link(:edit).get
+
           # Deploying VM
           env[:ui].info I18n.t('vagrant_abiquo.info.deploy')
-          task_lnk = AbiquoAPI::Link.new :href => @client.post(@vm.link(:deploy), '').link(:status).href,
-                                          :type => 'application/vnd.abiquo.task+json',
-                                          :client => @client
-          @task = task_lnk.get
+          task = deploy(vm)
 
-          # Check when deploy finishes. This may take a while
-          retryable(:tries => 120, :sleep => 15) do
-            @task = @task.link(:self).get
-            raise Exception if @task.state == 'STARTED'
-          end
-
-          if @task.state == 'FINISHED_SUCCESSFULLY'
+          if task.state == 'FINISHED_SUCCESSFULLY'
             # Deploy successfully completed
             env[:ui].info I18n.t('vagrant_abiquo.info.deploycompleted')
 
             # Find its IP
-            @vm = @vm.link(:edit).get
-            ip = @vm.link(:nic0).title
+            vm = vm.link(:edit).get
+            ip = vm.link(:nic0).title
             env[:ui].info I18n.t('vagrant_abiquo.info.vm_ip', :ip => ip)
-            @machine.id = @vm.url            
+            @machine.id = vm.url            
           else
             # Deploy failed
             env[:ui].info I18n.t('vagrant_abiquo.info.deployfailed')

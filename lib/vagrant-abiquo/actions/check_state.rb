@@ -1,4 +1,5 @@
 require 'vagrant-abiquo/helpers/client'
+require 'vagrant-abiquo/helpers/abiquo'
 
 module VagrantPlugins
   module Abiquo

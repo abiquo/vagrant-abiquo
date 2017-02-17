@@ -1,6 +1,6 @@
 require 'vagrant-abiquo/helpers/client'
 require 'abiquo-api'
-
+require 'pry'
 module VagrantPlugins
   module Abiquo
     class Provider < Vagrant.plugin('2', :provider)
@@ -40,13 +40,8 @@ module VagrantPlugins
         return nil if state.id != :ON
 
         vm = Provider.virtualmachine(@machine)
-        nics = vm.link(:nics).get
-        if @machine.provider_config.ssh_private_ips
-          ip = nics.map {|n| n.links.map {|l| l.values }.flatten }.map {|t| t.title }.flatten.first
-        else
-          ip = nics.map {|n| n.links.map {|l| l.values }.flatten.select {|v| v.type.include? 'external' or v.type.include? 'public' }.map {|t| t.title } }.flatten.first
-        end
-
+        ip = vm.link(:nics).get.first.ip
+        
         template = vm.link(:virtualmachinetemplate).get
         username = template.loginUser if template.respond_to? :loginUser
 
