@@ -25,7 +25,7 @@ module VagrantPlugins
           vapp = get_vapp(vdc, @machine.provider_config.virtualappliance)
           if vapp.nil?
             # Then, just create the vApp
-            vapp = create_vapp(vdc, @machine.provider_config.virtualappliance)
+            vapp = create_vapp(vdc, File.basename(@machine.env.cwd))
           end
 
           # Find for selected vm template
