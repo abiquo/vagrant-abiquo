@@ -4,7 +4,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'vagrant-abiquo/version'
 
 Gem::Specification.new do |gem|
-  gem.name          = "vagrant-abiquo"
+  gem.name          = "vagrant_abiquo"
   gem.version       = VagrantPlugins::Abiquo::VERSION
   gem.authors       = ["Daniel Beneyto", "Marc Cirauqui"]
   gem.email         = ["daniel.beneyto@abiquo.com", "marc.cirauqui@abiquo.com"]

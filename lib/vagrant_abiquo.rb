@@ -1,10 +1,10 @@
 require 'pathname'
-require 'vagrant-abiquo/plugin'
-require 'vagrant-abiquo/helpers/client'
+require 'vagrant_abiquo/plugin'
+require 'vagrant_abiquo/helpers/client'
 
 module VagrantPlugins
   module Abiquo
-    lib_path = Pathname.new(File.expand_path("../vagrant-abiquo", __FILE__))
+    lib_path = Pathname.new(File.expand_path("../vagrant_abiquo", __FILE__))
     autoload :Actions, lib_path.join("actions")
     autoload :Errors, lib_path.join("errors")
 

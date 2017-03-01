@@ -9,5 +9,5 @@ group :development do
 end
 
 group :plugins do
-  gem "vagrant-abiquo", path: "."
+  gem "vagrant_abiquo", path: "."
 end

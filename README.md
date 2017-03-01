@@ -1,6 +1,6 @@
 Abiquo Vagrant Provider
 ==============================
-`vagrant-abiquo` is a provider plugin for Vagrant that supports the
+`vagrant_abiquo` is a provider plugin for Vagrant that supports the
 management of [Abiquo](https://www.abiquo.com/) virtual machines
 
 Current features include:
@@ -16,7 +16,7 @@ Installation of the provider requires two steps:
 1. Install the provider plugin using the Vagrant command-line interface:
 
 ```
-$ vagrant plugin install vagrant-abiquo
+$ vagrant plugin install vagrant_abiquo
 ```
 
 Configure

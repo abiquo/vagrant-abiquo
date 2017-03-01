@@ -1,9 +1,9 @@
-require 'vagrant-abiquo/actions/check_state'
-require 'vagrant-abiquo/actions/create'
-require 'vagrant-abiquo/actions/destroy'
-require 'vagrant-abiquo/actions/power_off'
-require 'vagrant-abiquo/actions/power_on'
-require 'vagrant-abiquo/actions/reset'
+require 'vagrant_abiquo/actions/check_state'
+require 'vagrant_abiquo/actions/create'
+require 'vagrant_abiquo/actions/destroy'
+require 'vagrant_abiquo/actions/power_off'
+require 'vagrant_abiquo/actions/power_on'
+require 'vagrant_abiquo/actions/reset'
 
 module VagrantPlugins
   module Abiquo
