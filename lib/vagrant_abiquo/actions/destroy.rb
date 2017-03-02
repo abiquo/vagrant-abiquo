@@ -24,7 +24,7 @@ module VagrantPlugins
           # Check when task finishes. This may take a while
           retryable(:tries => 120, :sleep => 5) do
             begin
-              raise Exception if vm.refresh
+              raise vm.label if vm.refresh
             rescue AbiquoAPIClient::NotFound
               env[:ui].info I18n.t('vagrant_abiquo.info.deleted', vm: @machine.name)
             end

@@ -16,6 +16,11 @@ module VagrantPlugins
         require_relative 'provider'
         Provider
       end
+
+      action_hook(:create_vapp, :environment_load) do |hook|
+        require_relative 'actions/create_vapp.rb'
+        hook.prepend(Actions::CreatevApp)
+      end
     end
   end
 end

@@ -10,6 +10,10 @@ module VagrantPlugins
 
         @logger = Log4r::Logger.new('vagrant::abiquo::helper')
 
+        def vapp_name(machine)
+          machine.provider_config.virtualappliance.nil? ? File.basename(machine.env.cwd) : machine.provider_config.virtualappliance
+        end
+
         def get_vm(vm_url)
           vm_lnk = AbiquoAPI::Link.new :href => vm_url,
                                        :type => 'application/vnd.abiquo.virtualmachine+json',
@@ -108,7 +112,7 @@ module VagrantPlugins
           # Check when deploy finishes. This may take a while
           retryable(:tries => 120, :sleep => 15) do
             task = task.link(:self).get
-            raise Exception if task.state == 'STARTED'
+            raise vm.label if task.state == 'STARTED'
           end
 
           task
@@ -123,7 +127,7 @@ module VagrantPlugins
           # Check when task finishes. This may take a while
           retryable(:tries => 120, :sleep => 5) do
             task = task.link(:self).get
-            raise Exception if task.state == 'STARTED'
+            raise vm.label if task.state == 'STARTED'
           end
           vm.link(:edit).get
         end
@@ -144,7 +148,7 @@ module VagrantPlugins
           # Check when task finishes. This may take a while
           retryable(:tries => 120, :sleep => 5) do
             task = task.link(:self).get
-            raise Exception if task.state == 'STARTED'
+            raise vm.label if task.state == 'STARTED'
           end
           vm.link(:edit).get
         end
@@ -158,7 +162,7 @@ module VagrantPlugins
             # Check when task finishes. This may take a while
             retryable(:tries => 120, :sleep => 5) do
               task = task.link(:self).get
-              raise Exception if task.state == 'STARTED'
+              raise vm.label if task.state == 'STARTED'
             end
           end
           vm.link(:edit).get

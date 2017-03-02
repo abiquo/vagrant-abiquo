@@ -13,6 +13,7 @@ module VagrantPlugins
           @app = app
           @machine = env[:machine]
           @client = client
+          @env = env
           @logger = Log4r::Logger.new('vagrant::abiquo::create')
         end
 
@@ -22,11 +23,8 @@ module VagrantPlugins
           raise Abiquo::Errors::VDCNotFound, vdc: @machine.provider_config.virtualdatacenter if vdc.nil?
           
           # Find for selected virtual appliance
-          vapp = get_vapp(vdc, @machine.provider_config.virtualappliance)
-          if vapp.nil?
-            # Then, just create the vApp
-            vapp = create_vapp(vdc, File.basename(@machine.env.cwd))
-          end
+          vname = vapp_name(@machine)
+          vapp = get_vapp(vdc, vname)
 
           # Find for selected vm template
           template = get_template(vdc, @machine.provider_config.template)
@@ -53,6 +51,16 @@ module VagrantPlugins
           env[:ui].info I18n.t('vagrant_abiquo.info.create')
           vm = create_vm(vm_definition, vapp)
 
+          # User Data
+          md = vm.link(:metadata).get
+          mdhash = JSON.parse(md.to_json)
+          if mdhash['metadata'].nil?
+            mdhash['metadata'] = { 'startup-script' => @machine.provider_config.user_data }
+          else
+            mdhash['metadata']['startup-script'] = @machine.provider_config.user_data
+          end
+          @client.put(vm.link(:metadata), mdhash.to_json)
+
           # Check network
           unless @machine.provider_config.network.nil?
             # Network config is not nil, so we have
@@ -70,14 +78,20 @@ module VagrantPlugins
             # Deploy successfully completed
             env[:ui].info I18n.t('vagrant_abiquo.info.deploycompleted')
 
+            # Give time to the OS to boot.
+            retryable(:tries => 20, :sleep => 5) do
+              next if env[:interrupted]
+              raise 'not ready' if !@machine.communicate.ready?
+            end
+
             # Find its IP
             vm = vm.link(:edit).get
             ip = vm.link(:nic0).title
             env[:ui].info I18n.t('vagrant_abiquo.info.vm_ip', :ip => ip)
-            @machine.id = vm.url            
+            @machine.id = vm.url
           else
             # Deploy failed
-            env[:ui].info I18n.t('vagrant_abiquo.info.deployfailed')
+            env[:ui].error I18n.t('vagrant_abiquo.info.deployfailed')
           end
 
           @app.call(env)

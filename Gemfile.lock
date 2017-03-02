@@ -24,7 +24,7 @@ GIT
 PATH
   remote: .
   specs:
-    vagrant-abiquo (0.0.2)
+    vagrant_abiquo (0.0.2)
       abiquo-api (~> 0.1.1)
       log4r
 
@@ -143,7 +143,7 @@ DEPENDENCIES
   pry-byebug
   rake
   vagrant!
-  vagrant-abiquo!
+  vagrant_abiquo!
 
 BUNDLED WITH
-   1.14.3
+   1.14.5

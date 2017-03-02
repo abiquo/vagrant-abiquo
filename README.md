@@ -33,7 +33,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   
   config.vm.provider :abiquo do |provider, override|
     override.vm.box = 'abiquo'
-    override.vm.box_url = "https://github.com/smdahlen/vagrant-digitalocean/raw/master/box/digital_ocean.box"
+    override.vm.box_url = "https://github.com/abiquo/vagrant_abiquo/raw/master/box/abiquo.box"
     
     provider.abiquo_connection_data = {
       abiquo_api_url: 'http://mothership.bcn.abiquo.com/api',

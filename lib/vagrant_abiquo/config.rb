@@ -8,6 +8,7 @@ module VagrantPlugins
       attr_accessor :ram_mb
       attr_accessor :template
       attr_accessor :network
+      attr_accessor :user_data
 
       def initialize
         @abiquo_connection_data = UNSET_VALUE
@@ -17,24 +18,28 @@ module VagrantPlugins
         @cpu_cores              = 0
         @ram_mb                 = 0
         @network                = UNSET_VALUE
+        @user_data              = UNSET_VALUE
       end
 
       def finalize!
-        @abiquo_connection_data[:abiquo_api_url] = ENV['ABQ_URL'] if ENV['ABQ_URL']
-        @abiquo_connection_data[:abiquo_username] = ENV['ABQ_USER'] if ENV['ABQ_USER']
-        @abiquo_connection_data[:abiquo_password] = ENV['ABQ_PASS'] if ENV['ABQ_PASS']
+        @abiquo_connection_data[:abiquo_api_url] = ENV['ABQ_URL'] if @abiquo_connection_data[:abiquo_api_url].nil?
+        @abiquo_connection_data[:abiquo_username] = ENV['ABQ_USER'] if @abiquo_connection_data[:abiquo_username].nil?
+        @abiquo_connection_data[:abiquo_password] = ENV['ABQ_PASS'] if @abiquo_connection_data[:abiquo_password].nil?
 
-        @virtualdatacenter = ENV['ABQ_VDC'] if ENV['ABQ_VDC']
-        @virtualappliance = ENV['ABQ_VAPP'] if ENV['ABQ_VAPP']
-        @template = ENV['ABQ_TMPL'] if ENV['ABQ_TMPL']
+        @virtualdatacenter = ENV['ABQ_VDC'] if @virtualdatacenter == UNSET_VALUE
+        @virtualappliance = ENV['ABQ_VAPP'] if @virtualappliance == UNSET_VALUE
+        @template = ENV['ABQ_TMPL'] if @template == UNSET_VALUE
 
-        @cpu_cores = ENV['ABQ_CPU'] if ENV['ABQ_CPU']
-        @cpu_cores = nil if @cpu_cores == 0
-        @ram_mb = ENV['ABQ_RAM'] if ENV['ABQ_RAM']
+        @cpu_cores = ENV['ABQ_CPU'] if @cpu_cores == 0
+        @ram_mb = ENV['ABQ_RAM'] if @ram_mb == 0
         @ram_mb = nil if @ram_mb == 0
 
-        @network = { ENV['ABQ_NET'] => ENV['ABQ_IP'] } if ENV['ABQ_NET'] && ENV['ABQ_IP']
-        @network = nil if @network == UNSET_VALUE
+        @network = { ENV['ABQ_NET'] => ENV['ABQ_IP'] } if @network == UNSET_VALUE
+
+        if @user_data == UNSET_VALUE
+          # We will make sure the SSH key is injected.
+          @user_data = '#!/bin/bash\necho "vagrant_abiquo :: making sure SSH key gets injected."'
+        end
       end
 
       def validate(machine)

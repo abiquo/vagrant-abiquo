@@ -38,10 +38,12 @@ module VagrantPlugins
               env[:ui].info I18n.t('vagrant_abiquo.info.already_active')
             when :OFF
               b.use PowerOn
-              b.use provision
+              b.use Provision
+              b.use SyncedFolders
             when :not_created
               b.use Create
-              b.use provision
+              b.use Provision
+              b.use SyncedFolders
             end
           end
         end
