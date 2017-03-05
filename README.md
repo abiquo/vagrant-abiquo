@@ -68,7 +68,10 @@ The following attributes are available to further configure the provider:
    missing, the required RAM from the template will be used.
 - `provider.network` - A hash of network and IP pairs. Each key will be a network
    name in Abiquo, and the value can be a specific IP to attach, or `nil` to
-   autoselect an IP from the network. 
+   autoselect an IP from the network.
+- `user_data` - An optional user data script to be passed on to the VM. If not
+   specified, the plugin adds a simple provision script to ensure SSH keys are
+   injected to the VM.
 
 Run
 ---
