@@ -2,7 +2,7 @@ source 'https://rubygems.org'
 
 group :development do
   gem 'vagrant', git: 'https://github.com/mitchellh/vagrant.git'
-  gem 'abiquo-api', '~> 0.1.1'
+  gem 'abiquo-api', '~> 0.1.2'
   gem 'rake'
   gem 'pry'
   gem 'pry-byebug'
