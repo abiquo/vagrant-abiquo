@@ -24,22 +24,23 @@ GIT
 PATH
   remote: .
   specs:
-    vagrant_abiquo (0.0.2)
-      abiquo-api (~> 0.1.1)
+    vagrant_abiquo (0.0.3)
+      abiquo-api (~> 0.1.2)
       log4r
 
 GEM
   remote: https://rubygems.org/
   specs:
-    abiquo-api (0.1.1)
-      addressable (~> 2.4.0, >= 2.4.0)
+    abiquo-api (0.1.2)
+      addressable
       excon (~> 0.43, >= 0.43.0)
       faraday (~> 0.9.2, >= 0.9.2)
       faraday_middleware (~> 0.10.0, >= 0.10.0)
       formatador (~> 0.2, >= 0.2.5)
-      json (~> 2.0, >= 2.0.2)
+      json
       simple_oauth (~> 0.3.1, >= 0.3.1)
-    addressable (2.4.0)
+    addressable (2.5.0)
+      public_suffix (~> 2.0, >= 2.0.2)
     builder (3.2.3)
     byebug (9.0.6)
     childprocess (0.5.9)
@@ -97,6 +98,7 @@ GEM
     pry-byebug (3.4.2)
       byebug (~> 9.0)
       pry (~> 0.10)
+    public_suffix (2.0.5)
     rake (12.0.0)
     rb-fsevent (0.9.8)
     rb-inotify (0.9.8)
@@ -138,7 +140,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  abiquo-api (~> 0.1.1)
+  abiquo-api (~> 0.1.2)
   pry
   pry-byebug
   rake
