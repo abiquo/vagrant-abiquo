@@ -6,6 +6,7 @@ module VagrantPlugins
       attr_accessor :virtualappliance
       attr_accessor :cpu_cores
       attr_accessor :ram_mb
+      attr_accessor :hwprofile
       attr_accessor :template
       attr_accessor :network
       attr_accessor :user_data
@@ -17,6 +18,7 @@ module VagrantPlugins
         @template               = UNSET_VALUE
         @cpu_cores              = 0
         @ram_mb                 = 0
+        @hwprofile              = UNSET_VALUE
         @network                = UNSET_VALUE
         @user_data              = UNSET_VALUE
       end
@@ -33,6 +35,7 @@ module VagrantPlugins
         @cpu_cores = ENV['ABQ_CPU'] if @cpu_cores == 0
         @ram_mb = ENV['ABQ_RAM'] if @ram_mb == 0
         @ram_mb = nil if @ram_mb == 0
+        @hwprofile = ENV['ABQ_HWPROFILE'] if @hwprofile == UNSET_VALUE
 
         @network = { ENV['ABQ_NET'] => ENV['ABQ_IP'] } if @network == UNSET_VALUE
 
@@ -47,6 +50,7 @@ module VagrantPlugins
         errors << I18n.t('vagrant_abiquo.config.abiquo_connection_data') if !@abiquo_connection_data
         errors << I18n.t('vagrant_abiquo.config.virtualdatacenter') if !@virtualdatacenter
         errors << I18n.t('vagrant_abiquo.config.template') if !@template
+        errors << I18n.t('vagrant_abiquo.config.cpuhwprofile') if @cpu_cores.nil? and @hwprofile.nil?
 
         { 'Abiquo Provider' => errors }
       end

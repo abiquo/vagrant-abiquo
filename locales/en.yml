@@ -26,10 +26,10 @@ en:
       rsyncing: Rsyncing folder %{hostpath} => %{guestpath}...
       rsync_missing: The rsync executable was not found in the current path.
     config:
-      client_id: Client ID is required
-      api_key: API key is required"
-      private_key: SSH private key path is required
-      public_key: SSH public key not found %{key}
+      abiquo_connection_data: Abiquo connection data not found in config!
+      virtualdatacenter: Abiquo virtualdatacenter not found in config!
+      template: Abiquo template not found in config!
+      cpuhwprofile: Either hardware profile or cpu core count is required!
     errors:
       vdc_not_found: Virtual datacenter '%{vdc}' not found
       template_not_found: Template %{template} not found in VDC '%{vdc}'
@@ -37,6 +37,11 @@ en:
       network_error: |-
         A network error has ocurred. The process of assigning the VM to the
         designated networks has failed. Please review the network configuration.
+      hwprofile_enabled: |-
+        The virtualdatacenter '%{vdc}' requires the use of hardware profiles.
+        Correct the Abiquo provider config so it points to a valid hardware
+        profile instead of specifying CPU cores and RAM.
+      hwprofile_not_found: Hardware profile '%{hwprofile}' not found in VDC '%{vdc}'
       public_key: |-
         There was an issue reading the public key at:
 

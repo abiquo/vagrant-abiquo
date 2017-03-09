@@ -22,6 +22,14 @@ module VagrantPlugins
           vdc = get_vdc(@machine.provider_config.virtualdatacenter)
           raise Abiquo::Errors::VDCNotFound, vdc: @machine.provider_config.virtualdatacenter if vdc.nil?
           
+          # Check if we have to use hwprofiles
+          lim = vdc.link(:enterprise).get.link(:limits).get.select {|l| l.link(:location).title == vdc.link(:location).title }.first
+          if lim.enabledHardwareProfiles
+            if @machine.provider_config.hwprofile.nil?
+              raise Abiquo::Errors::HWprofileEnabled, vdc: @machine.provider_config.virtualdatacenter
+            end
+          end
+
           # Find for selected virtual appliance
           vname = vapp_name(@machine)
           vapp = get_vapp(vdc, vname)
@@ -35,17 +43,28 @@ module VagrantPlugins
           tmpl_link = template.link(:edit).clone.to_hash
           tmpl_link['rel'] = "virtualmachinetemplate"
           
-          # Configured CPU and RAM
-          cpu_cores = @machine.provider_config.cpu_cores
-          ram_mb = @machine.provider_config.ram_mb
-
           # VM entity
           vm_definition = {}
-          vm_definition['cpu'] = cpu_cores || template.cpuRequired
-          vm_definition['ram'] = ram_mb || template.ramRequired
+          
+          # Configured CPU and RAM
+          if lim.enabledHardwareProfiles
+            # lookup the hwprofile link
+            hwprofile = vdc.link(:location).get.link(:hardwareprofiles).get
+                              .select {|h| h.name == @machine.provider_config.hwprofile }.first
+            raise Abiquo::Errors::HWProfileNotFound, hwprofile: @machine.provider_config.hwprofile, vdc: vdc.name if hwprofile.nil?
+            hwprofile_lnk = hwprofile.link(:self).clone.to_hash
+            hwprofile_lnk['rel'] = 'hardwareprofile'
+
+            vm_definition['links'] = [ tmpl_link, hwprofile_lnk ]
+          else
+            cpu_cores = @machine.provider_config.cpu_cores
+            ram_mb = @machine.provider_config.ram_mb
+            vm_definition['cpu'] = cpu_cores || template.cpuRequired
+            vm_definition['ram'] = ram_mb || template.ramRequired
+          end
+
           vm_definition['label'] = @machine.name
           vm_definition['vdrpEnabled'] = true
-          vm_definition['links'] = [ tmpl_link ]
 
           # Create VM
           env[:ui].info I18n.t('vagrant_abiquo.info.create')

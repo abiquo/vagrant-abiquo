@@ -72,6 +72,8 @@ The following attributes are available to further configure the provider:
 - `user_data` - An optional user data script to be passed on to the VM. If not
    specified, the plugin adds a simple provision script to ensure SSH keys are
    injected to the VM.
+- `hwprofile` - If the VDC where you are going to deploy uses hardware profiles,
+   specify the one to use by name. Either this or CPU/RAM pair is required.
 
 Run
 ---

@@ -21,6 +21,14 @@ module VagrantPlugins
         error_key(:network_error)
       end
 
+      class HWprofileEnabled < AbiquoError
+        error_key(:hwprofile_enabled)
+      end
+
+      class HWProfileNotFound < AbiquoError
+        error_key(:hwprofile_not_found)
+      end
+
       class APIStatusError < AbiquoError
         error_key(:api_status)
       end
