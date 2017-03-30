@@ -24,7 +24,7 @@ module VagrantPlugins
           
           # Check if we have to use hwprofiles
           lim = vdc.link(:enterprise).get.link(:limits).get.select {|l| l.link(:location).title == vdc.link(:location).title }.first
-          if lim.enabledHardwareProfiles
+          if lim.respond_to? :enabledHardwareProfiles
             if @machine.provider_config.hwprofile.nil?
               raise Abiquo::Errors::HWprofileEnabled, vdc: @machine.provider_config.virtualdatacenter
             end
@@ -47,7 +47,7 @@ module VagrantPlugins
           vm_definition = {}
           
           # Configured CPU and RAM
-          if lim.enabledHardwareProfiles
+          if lim.respond_to? :enabledHardwareProfiles
             # lookup the hwprofile link
             hwprofile = vdc.link(:location).get.link(:hardwareprofiles).get
                               .select {|h| h.name == @machine.provider_config.hwprofile }.first
@@ -61,6 +61,7 @@ module VagrantPlugins
             ram_mb = @machine.provider_config.ram_mb
             vm_definition['cpu'] = cpu_cores || template.cpuRequired
             vm_definition['ram'] = ram_mb || template.ramRequired
+            vm_definition['links'] = [ tmpl_link ]
           end
 
           vm_definition['label'] = @machine.name
@@ -88,30 +89,7 @@ module VagrantPlugins
             raise Abiquo::Errors::NetworkError if vm.nil?
           end
           vm = vm.link(:edit).get
-
-          # Deploying VM
-          env[:ui].info I18n.t('vagrant_abiquo.info.deploy')
-          task = deploy(vm)
-
-          if task.state == 'FINISHED_SUCCESSFULLY'
-            # Deploy successfully completed
-            env[:ui].info I18n.t('vagrant_abiquo.info.deploycompleted')
-
-            # Give time to the OS to boot.
-            retryable(:tries => 20, :sleep => 5) do
-              next if env[:interrupted]
-              raise 'not ready' if !@machine.communicate.ready?
-            end
-
-            # Find its IP
-            vm = vm.link(:edit).get
-            ip = vm.link(:nic0).title
-            env[:ui].info I18n.t('vagrant_abiquo.info.vm_ip', :ip => ip)
-            @machine.id = vm.url
-          else
-            # Deploy failed
-            env[:ui].error I18n.t('vagrant_abiquo.info.deployfailed')
-          end
+          @machine.id = vm.url
 
           @app.call(env)
         end

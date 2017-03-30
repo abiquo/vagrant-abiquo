@@ -42,9 +42,11 @@ module VagrantPlugins
 
       def ssh_info
         return nil if state.id != :ON
-
-        @vm ||= Provider.virtualmachine(@machine)
-        @ip ||= @vm.link(:nics).get.first.ip
+        begin
+          @ip ||= @vm.link(:nics).get.first.ip
+        rescue Exception
+          return nil
+        end
         
         template = @vm.link(:virtualmachinetemplate).get unless @username
         @username = template.loginUser if template.respond_to? :loginUser
@@ -57,7 +59,7 @@ module VagrantPlugins
       end
 
       def state
-        @vm ||= Provider.virtualmachine(@machine)
+        @vm = Provider.virtualmachine(@machine)
         state = @vm.nil? ? :not_created : @vm.state.to_sym
         long = short = state.to_s
         Vagrant::MachineState.new(state, short, long)

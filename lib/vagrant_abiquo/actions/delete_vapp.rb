@@ -4,14 +4,14 @@ require 'vagrant_abiquo/helpers/abiquo'
 module VagrantPlugins
   module Abiquo
     module Actions
-      class CreatevApp
+      class DeletevApp
         include Helpers::Client
         include Helpers::Abiquo
         
         def initialize(app, env)
           @app = app
           @machine = env[:machine]
-          @logger = Log4r::Logger.new('vagrant::abiquo::create_vapp')
+          @logger = Log4r::Logger.new('vagrant::abiquo::delete_vapp')
         end
 
         def call(env)
@@ -28,9 +28,9 @@ module VagrantPlugins
           raise Abiquo::Errors::VDCNotFound, vdc: pconfig.virtualdatacenter if vdc.nil?
 
           vapp = get_vapp(vdc, pconfig.virtualappliance)
-          if vapp.nil?
-            @logger.info "vApp '#{pconfig.virtualappliance}' does not exist, creating."
-            create_vapp(vdc, pconfig.virtualappliance)
+          if vapp.link(:virtualmachines).get.count == 0
+            @logger.info "vApp '#{pconfig.virtualappliance}' is empty, deleting."
+            vapp.delete
           end
 
           @app.call(env)

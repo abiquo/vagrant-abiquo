@@ -24,9 +24,11 @@ module VagrantPlugins
       end
 
       def finalize!
+        @abiquo_connection_data = {} if @abiquo_connection_data == UNSET_VALUE
         @abiquo_connection_data[:abiquo_api_url] = ENV['ABQ_URL'] if @abiquo_connection_data[:abiquo_api_url].nil?
         @abiquo_connection_data[:abiquo_username] = ENV['ABQ_USER'] if @abiquo_connection_data[:abiquo_username].nil?
         @abiquo_connection_data[:abiquo_password] = ENV['ABQ_PASS'] if @abiquo_connection_data[:abiquo_password].nil?
+        @abiquo_connection_data = nil if @abiquo_connection_data[:abiquo_api_url].nil?
 
         @virtualdatacenter = ENV['ABQ_VDC'] if @virtualdatacenter == UNSET_VALUE
         @virtualappliance = ENV['ABQ_VAPP'] if @virtualappliance == UNSET_VALUE

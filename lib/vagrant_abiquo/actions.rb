@@ -1,5 +1,6 @@
 require 'vagrant_abiquo/actions/check_state'
 require 'vagrant_abiquo/actions/create'
+require 'vagrant_abiquo/actions/deploy'
 require 'vagrant_abiquo/actions/destroy'
 require 'vagrant_abiquo/actions/power_off'
 require 'vagrant_abiquo/actions/power_on'
@@ -42,6 +43,11 @@ module VagrantPlugins
               b.use SyncedFolders
             when :not_created
               b.use Create
+              b.use Deploy
+              b.use Provision
+              b.use SyncedFolders
+            when :NOT_ALLOCATED
+              b.use Deploy
               b.use Provision
               b.use SyncedFolders
             end

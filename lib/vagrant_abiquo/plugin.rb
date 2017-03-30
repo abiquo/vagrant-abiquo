@@ -21,6 +21,11 @@ module VagrantPlugins
         require_relative 'actions/create_vapp.rb'
         hook.prepend(Actions::CreatevApp)
       end
+
+      action_hook(:delete_vapp, :environment_unload) do |hook|
+        require_relative 'actions/delete_vapp.rb'
+        hook.prepend(Actions::DeletevApp)
+      end
     end
   end
 end
