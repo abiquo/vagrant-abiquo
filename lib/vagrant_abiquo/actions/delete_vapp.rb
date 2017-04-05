@@ -28,7 +28,7 @@ module VagrantPlugins
           raise Abiquo::Errors::VDCNotFound, vdc: pconfig.virtualdatacenter if vdc.nil?
 
           vapp = get_vapp(vdc, pconfig.virtualappliance)
-          if vapp.link(:virtualmachines).get.count == 0
+          unless vapp.nil? || vapp.link(:virtualmachines).get.count > 0
             @logger.info "vApp '#{pconfig.virtualappliance}' is empty, deleting."
             vapp.delete
           end

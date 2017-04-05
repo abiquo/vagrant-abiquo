@@ -24,7 +24,7 @@ module VagrantPlugins
           
           # Check if we have to use hwprofiles
           lim = vdc.link(:enterprise).get.link(:limits).get.select {|l| l.link(:location).title == vdc.link(:location).title }.first
-          if lim.respond_to? :enabledHardwareProfiles
+          if lim.respond_to?(:enabledHardwareProfiles) && lim.enabledHardwareProfiles
             if @machine.provider_config.hwprofile.nil?
               raise Abiquo::Errors::HWprofileEnabled, vdc: @machine.provider_config.virtualdatacenter
             end
@@ -47,15 +47,15 @@ module VagrantPlugins
           vm_definition = {}
           
           # Configured CPU and RAM
-          if lim.respond_to? :enabledHardwareProfiles
-            # lookup the hwprofile link
-            hwprofile = vdc.link(:location).get.link(:hardwareprofiles).get
-                              .select {|h| h.name == @machine.provider_config.hwprofile }.first
-            raise Abiquo::Errors::HWProfileNotFound, hwprofile: @machine.provider_config.hwprofile, vdc: vdc.name if hwprofile.nil?
-            hwprofile_lnk = hwprofile.link(:self).clone.to_hash
-            hwprofile_lnk['rel'] = 'hardwareprofile'
+          if lim.respond_to?(:enabledHardwareProfiles) && lim.enabledHardwareProfiles
+              # lookup the hwprofile link
+              hwprofile = vdc.link(:location).get.link(:hardwareprofiles).get
+                                .select {|h| h.name == @machine.provider_config.hwprofile }.first
+              raise Abiquo::Errors::HWProfileNotFound, hwprofile: @machine.provider_config.hwprofile, vdc: vdc.name if hwprofile.nil?
+              hwprofile_lnk = hwprofile.link(:self).clone.to_hash
+              hwprofile_lnk['rel'] = 'hardwareprofile'
 
-            vm_definition['links'] = [ tmpl_link, hwprofile_lnk ]
+              vm_definition['links'] = [ tmpl_link, hwprofile_lnk ]
           else
             cpu_cores = @machine.provider_config.cpu_cores
             ram_mb = @machine.provider_config.ram_mb

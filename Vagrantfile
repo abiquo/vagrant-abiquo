@@ -3,9 +3,11 @@ VAGRANTFILE_API_VERSION = "2"
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.synced_folder ".", "/vagrant", type: "rsync"
 
-  (1..10).each do |ind|
-    config.vm.define "abiquotesting-#{ind}"
-  end
+  config.vm.define "abiquosingle"
+
+  #(1..10).each do |ind|
+  #  config.vm.define "abiquotesting-#{ind}"
+  #end
 
   config.vm.provider :abiquo do |provider, override|
     override.vm.box = 'abiquo'
@@ -27,8 +29,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     #provider.hwprofile = '4gb'
     provider.virtualdatacenter = 'esx'
     provider.virtualappliance = 'Vagrant Tests'
-    provider.template = 'Alpine'
+    provider.template = 'Centos 7 x86_64'
 
     override.ssh.private_key_path = '~/.ssh/id_rsa'
+    override.ssh.username = 'centos'
   end
 end
