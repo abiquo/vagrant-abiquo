@@ -21,8 +21,8 @@ module VagrantPlugins
             else
               b.use Call, DestroyConfirm do |env2, b2|
                 if env2[:result]
+                  b2.use ProvisionerCleanup, :before if defined?(ProvisionerCleanup)
                   b2.use Destroy
-                  b2.use ProvisionerCleanup if defined?(ProvisionerCleanup)
                 end
               end
             end
