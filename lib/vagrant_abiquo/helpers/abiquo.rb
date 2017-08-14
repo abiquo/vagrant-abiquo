@@ -48,13 +48,7 @@ module VagrantPlugins
 
           networks = []
           %w(privatenetworks network externalnetworks).each do |nettype|
-            begin
-            vdc.link(nettype.to_sym).get.each {|n| networks << n}
-            rescue Exception => e
-              @logger.debug "Exception retrieving '#{nettype}' networks."
-              @logger.debug e.message
-              @logger.debug e.backtrace
-            end
+            vdc.link(nettype.to_sym).get.each {|n| networks << n} if vdc.link? nettype.to_sym
           end
           networks.select {|n| n.name == net_name }.first
         end

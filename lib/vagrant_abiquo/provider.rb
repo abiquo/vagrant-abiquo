@@ -44,7 +44,7 @@ module VagrantPlugins
         return nil if state.id != :ON
         begin
           @ip ||= @vm.link(:nics).get.first.ip
-        rescue Exception
+        rescue AbiquoAPIClient::NotFound
           return nil
         end
         
