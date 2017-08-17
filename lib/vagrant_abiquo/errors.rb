@@ -5,6 +5,10 @@ module VagrantPlugins
         error_namespace("vagrant_abiquo.errors")
       end
 
+      class InvalidStateError < AbiquoError
+        error_key(:invalid_state)
+      end
+
       class VDCNotFound < AbiquoError
         error_key(:vdc_not_found)
       end

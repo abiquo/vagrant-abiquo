@@ -1,27 +1,21 @@
 require 'abiquo-api'
-require 'log4r'
-include Log4r
 
 module VagrantPlugins
   module Abiquo
     module Helpers
       module Abiquo
-        include Helpers::Client
-
-        @logger = Log4r::Logger.new('vagrant::abiquo::helper')
-
         def vapp_name(machine)
           machine.provider_config.virtualappliance.nil? ? File.basename(machine.env.cwd) : machine.provider_config.virtualappliance
         end
 
-        def get_vm(vm_url)
+        def get_vm(client, vm_url)
           vm_lnk = AbiquoAPI::Link.new :href => vm_url,
                                        :type => 'application/vnd.abiquo.virtualmachine+json',
                                        :client => client
           vm_lnk.get
         end
 
-        def get_vdc(vdc_name)
+        def get_vdc(client, vdc_name)
           vdcs_lnk = AbiquoAPI::Link.new :href => 'cloud/virtualdatacenters',
                                          :type => "application/vnd.abiquo.virtualdatacenters+json",
                                          :client => client
@@ -32,7 +26,7 @@ module VagrantPlugins
           vdc.link(:virtualappliances).get.select {|va| va.name == name }.first
         end
 
-        def create_vapp(vdc, name)
+        def create_vapp(client, vdc, name)
           vapp_hash = { 'name' => name }
           client.post(vdc.link(:virtualappliances), vapp_hash.to_json,
                     accept: 'application/vnd.abiquo.virtualappliance+json',
@@ -48,18 +42,19 @@ module VagrantPlugins
 
           networks = []
           %w(privatenetworks network externalnetworks).each do |nettype|
-            vdc.link(nettype.to_sym).get.each {|n| networks << n} if vdc.link? nettype.to_sym
+            next if vdc.link(:location).type.include? "publiccloudregion" and nettype == "network"
+            vdc.link(nettype.to_sym).get.each {|n| networks << n} if vdc.has_link? nettype.to_sym
           end
           networks.select {|n| n.name == net_name }.first
         end
 
-        def create_vm(vm_def, vapp)
+        def create_vm(client, vm_def, vapp)
           client.post(vapp.link(:virtualmachines), vm_def.to_json, 
               :content => "application/vnd.abiquo.virtualmachine+json", 
               :accept => "application/vnd.abiquo.virtualmachine+json" )
         end
 
-        def attach_net(vm, net_data)
+        def attach_net(client, vm, net_data)
           net_data.each do |net, ip|
             network = get_network(vm, net)
             return nil if network.nil?
@@ -97,7 +92,7 @@ module VagrantPlugins
           end
         end
 
-        def deploy(vm)
+        def deploy(client, vm)
           task_lnk = client.post(vm.link(:deploy), '').link(:status).href
           task = AbiquoAPI::Link.new(:href => task_lnk,
                                      :type => 'application/vnd.abiquo.task+json',
@@ -112,7 +107,7 @@ module VagrantPlugins
           task
         end
 
-        def apply_state(vm, state)
+        def apply_state(client, vm, state)
           task_lnk = client.put(vm.link(:state), {"state" => state}.to_json,
                         :accept => 'application/vnd.abiquo.acceptedrequest+json',
                         :content => 'application/vnd.abiquo.virtualmachinestate+json').link(:status)
@@ -126,15 +121,15 @@ module VagrantPlugins
           vm.link(:edit).get
         end
 
-        def poweroff(vm)
-          apply_state('OFF')
+        def poweroff(client, vm)
+          apply_state(client, 'OFF')
         end
 
-        def poweron(vm)
-          apply_state('ON')
+        def poweron(client, vm)
+          apply_state(client, 'ON')
         end
 
-        def reset(vm)
+        def reset(client, vm)
           task = client.post(vm.link(:reset), '',
                         :accept => 'application/vnd.abiquo.acceptedrequest+json',
                         :content => 'application/json').link(:status).get
@@ -147,7 +142,7 @@ module VagrantPlugins
           vm.link(:edit).get
         end
 
-        def update(vm)
+        def update(client, vm)
           task = client.put(vm.link(:edit), vm.to_json,
                         :accept => 'application/vnd.abiquo.acceptedrequest+json',
                         :content => vm.link(:edit).type)

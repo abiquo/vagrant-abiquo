@@ -1,11 +1,9 @@
-require 'vagrant_abiquo/helpers/client'
 require 'vagrant_abiquo/helpers/abiquo'
 
 module VagrantPlugins
   module Abiquo
     module Actions
       class CreatevApp
-        include Helpers::Client
         include Helpers::Abiquo
         
         def initialize(app, env)
@@ -15,22 +13,23 @@ module VagrantPlugins
         end
 
         def call(env)
-          if env[:env].vagrantfile.config.finalize![:vm].respond_to? :get_provider_config
-            pconfig = env[:env].vagrantfile.config.finalize![:vm].get_provider_config(:abiquo)
-            return if pconfig.abiquo_connection_data.nil?
-          end
-          @client ||= AbiquoAPI.new(pconfig.abiquo_connection_data)
+          if @machine.provider_config.class == VagrantPlugins::Abiquo::Config
+            client = env[:abiquo_client]
+            
+            pconfig = @machine.provider_config
 
-          @logger.info "Checking vApp '#{pconfig.virtualappliance}'"
+            @logger.info "Checking vApp '#{pconfig.virtualappliance}'"
 
-          @logger.info "Looking up VDC '#{pconfig.virtualdatacenter}'"
-          vdc = get_vdc(pconfig.virtualdatacenter)
-          raise Abiquo::Errors::VDCNotFound, vdc: pconfig.virtualdatacenter if vdc.nil?
+            @logger.info "Looking up VDC '#{pconfig.virtualdatacenter}'"
 
-          vapp = get_vapp(vdc, pconfig.virtualappliance)
-          if vapp.nil?
-            @logger.info "vApp '#{pconfig.virtualappliance}' does not exist, creating."
-            create_vapp(vdc, pconfig.virtualappliance)
+            vdc = get_vdc(client, pconfig.virtualdatacenter)
+            raise Abiquo::Errors::VDCNotFound, vdc: pconfig.virtualdatacenter if vdc.nil?
+
+            vapp = get_vapp(vdc, pconfig.virtualappliance)
+            if vapp.nil?
+              @logger.info "vApp '#{pconfig.virtualappliance}' does not exist, creating."
+              create_vapp(client, vdc, pconfig.virtualappliance)
+            end
           end
 
           @app.call(env)

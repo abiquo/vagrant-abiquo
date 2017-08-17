@@ -1,25 +1,23 @@
-require 'vagrant_abiquo/helpers/client'
 require 'vagrant_abiquo/helpers/abiquo'
 
 module VagrantPlugins
   module Abiquo
     module Actions
       class Create
-        include Helpers::Client
         include Helpers::Abiquo
-        include Vagrant::Util::Retryable
 
         def initialize(app, env)
           @app = app
           @machine = env[:machine]
-          @client = client
           @env = env
           @logger = Log4r::Logger.new('vagrant::abiquo::create')
         end
 
         def call(env)
+          client = env[:abiquo_client]
+          
           # Find for selected virtual datacenter
-          vdc = get_vdc(@machine.provider_config.virtualdatacenter)
+          vdc = get_vdc(client, @machine.provider_config.virtualdatacenter)
           raise Abiquo::Errors::VDCNotFound, vdc: @machine.provider_config.virtualdatacenter if vdc.nil?
           
           # Check if we have to use hwprofiles
@@ -69,7 +67,7 @@ module VagrantPlugins
 
           # Create VM
           env[:ui].info I18n.t('vagrant_abiquo.info.create')
-          vm = create_vm(vm_definition, vapp)
+          vm = create_vm(client, vm_definition, vapp)
 
           # User Data
           md = vm.link(:metadata).get
@@ -79,37 +77,19 @@ module VagrantPlugins
           else
             mdhash['metadata']['startup-script'] = @machine.provider_config.user_data
           end
-          @client.put(vm.link(:metadata), mdhash.to_json)
+          client.put(vm.link(:metadata), mdhash.to_json)
 
           # Check network
           unless @machine.provider_config.network.nil?
             # Network config is not nil, so we have
             # to attach a specific net.
-            attach_net(vm, @machine.provider_config.network)
+            attach_net(client, vm, @machine.provider_config.network)
             raise Abiquo::Errors::NetworkError if vm.nil?
           end
           vm = vm.link(:edit).get
           @machine.id = vm.url
 
           @app.call(env)
-        end
-
-        # Both the recover and terminate are stolen almost verbatim from
-        # the Vagrant AWS provider up action
-        def recover(env)
-          return if env['vagrant.error'].is_a?(Vagrant::Errors::VagrantError)
-
-          if @machine.state.id != :not_created
-            terminate(env)
-          end
-        end
-
-        def terminate(env)
-          destroy_env = env.dup
-          destroy_env.delete(:interrupted)
-          destroy_env[:config_validate] = false
-          destroy_env[:force_confirm_destroy] = true
-          env[:action_runner].run(Actions.destroy, destroy_env)
         end
       end
     end

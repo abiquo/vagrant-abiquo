@@ -13,19 +13,26 @@ module VagrantPlugins
       end
 
       provider(:abiquo, parallel: true) do
+        setup_i18n
+
         require_relative 'provider'
         Provider
       end
 
-      action_hook(:create_vapp, :environment_load) do |hook|
-        require_relative 'actions/create_vapp.rb'
-        hook.prepend(Actions::CreatevApp)
+      def self.setup_i18n
+        I18n.load_path << File.expand_path('locales/en.yml', Abiquo.source_root)
+        I18n.reload!
       end
 
-      action_hook(:delete_vapp, :environment_unload) do |hook|
-        require_relative 'actions/delete_vapp.rb'
-        hook.prepend(Actions::DeletevApp)
-      end
+      # action_hook(:create_vapp, :environment_load) do |hook|
+      #   require_relative 'actions/create_vapp.rb'
+      #   hook.prepend(Actions::CreatevApp)
+      # end
+
+      # action_hook(:delete_vapp, :environment_unload) do |hook|
+      #   require_relative 'actions/delete_vapp.rb'
+      #   hook.prepend(Actions::DeletevApp)
+      # end
     end
   end
 end

@@ -43,7 +43,7 @@ module VagrantPlugins
 
         if @user_data == UNSET_VALUE
           # We will make sure the SSH key is injected.
-          @user_data = '#!/bin/bash\necho "vagrant_abiquo :: making sure SSH key gets injected."'
+          @user_data = "#!/bin/bash\necho \"vagrant_abiquo :: making sure SSH key gets injected.\""
         end
       end
 

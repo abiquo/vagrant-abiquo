@@ -15,8 +15,3 @@ task :test do
   end
 end
 
-def env
-  ['ABIQUO_API_USER', 'ABIQUO_API_PASSWORD', 'VAGRANT_LOG'].inject('') do |acc, key|
-    acc += "#{key}=#{ENV[key] || 'error'} "
-  end
-end
