@@ -88,7 +88,7 @@ module VagrantPlugins
             ip_lnk.rel = 'nic0'
             vm.links << {:nic0 => ip_lnk}
 
-            update(vm)
+            update(client, vm)
           end
         end
 
