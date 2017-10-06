@@ -15,6 +15,6 @@ Gem::Specification.new do |gem|
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
   gem.require_paths = ["lib"]
 
-  gem.add_dependency "abiquo-api", "~> 0.1.2"
+  gem.add_dependency "abiquo-api", "~> 0.1.3"
   gem.add_dependency "log4r"
 end
